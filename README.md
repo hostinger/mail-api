@@ -1,8 +1,12 @@
-# Hostinger Email API
+# Hostinger email API
 
-This repository is the public source of truth for the **Hostinger Email API** OpenAPI specification and its changelog.
+Welcome to the Hostinger email API main repository.
 
-The Hostinger Email API lets developers manage Hostinger Email programmatically - mailboxes, folders, messages, and related resources.
+We appreciate your feedback and contributions to help us improve.
+
+This repository is the public source of truth for the **Hostinger email API** OpenAPI specification and its changelog.
+
+The Hostinger email API lets developers manage Hostinger email programmatically - mailboxes, folders, messages, and related resources.
 
 - **Documentation:** https://api.mail.hostinger.com
 - **OpenAPI version:** 3.0.0
@@ -17,7 +21,7 @@ The Hostinger Email API lets developers manage Hostinger Email programmatically 
 
 ## ⚠️ Do not edit manually
 
-This repository is **automatically generated and published** from the Email API service on every release. `openapi.json` and `CHANGELOG.md` are overwritten by CI - any manual change here will be lost on the next publish.
+This repository is **automatically generated and published** from the email API service on every release. `openapi.json` and `CHANGELOG.md` are overwritten by CI - any manual change here will be lost on the next publish.
 
 ## Using the specification
 
