@@ -2,8 +2,8 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Hostinger Mail API",
-        "description": "# Overview\nThe Hostinger Mail API provides a set of endpoints that allow developers to manage Hostinger Email programmatically.\nThis API enables you to manage mailboxes and related resources tied to your Hostinger account.\n\nThe API is (mostly) RESTful and uses standard HTTP methods and status codes.\n\n# Official SDKs\nIntegrate the Hostinger Mail API in minutes using official, idiomatic SDKs - no more hand-rolling HTTP calls.\nPublished to native package managers, so it's a one-line install.\n\n- **PHP** - `composer require hostinger/mail-api-php-sdk` ([GitHub](https://github.com/hostinger/mail-api-php-sdk))\n- **TypeScript / Node.js** - `npm install hostinger-mail-api-sdk` ([GitHub](https://github.com/hostinger/mail-api-typescript-sdk))\n- **Python** - `pip install hostinger-mail-api` ([GitHub](https://github.com/hostinger/mail-api-python-sdk))\n- **CLI** - `brew install hostinger/tap/hostinger-mail` ([GitHub](https://github.com/hostinger/mail-api-cli))\n\n# Authentication\nThe API uses tokens for authentication. To authenticate your requests, you need to include a valid bearer token in the `Authorization` header of your HTTP requests:\n\n```yaml\nAuthorization: Bearer YOUR_API_TOKEN\n```\n\nAPI tokens can be created and managed from the email provisioning tab in the Hostinger Panel.\nTokens are scoped to a single order; their permissions are limited to that order.\n\nOnly mailboxes belonging to the order can be accessed and managed by an API token.\n\n# Rate Limiting\nTo ensure fair usage and prevent abuse, the API enforces rate limits on the number of requests that can be made within a certain time period.\nIf you exceed the rate limit, you will receive a `429 Too Many Requests` response.\nYour IP address might get temporarily blocked if you exceed the rate limit multiple times.\n\n# Parameters\nAll requests sent to the API must have the content type `application/json`.\n`POST`, `PUT`, `PATCH` methods may include a JSON object in the request body.\nDocumentation provides the required structure and examples of the object.\nSome endpoints require path parameters.\nThese parameters are included in the URL path and are marked with curly braces.\n\n# Response envelope\nAll non-`204` responses wrap the payload in a top-level `data` field.\n\nSingle resource:\n\n```json\n{\n  \"data\": {\n    \"resourceId\": \"AC1a2b3c4d5e6f7g\",\n    \"address\": \"user@example.com\"\n  }\n}\n```\n\nCollection (empty or otherwise):\n\n```json\n{\n  \"data\": []\n}\n```\n\n# Pagination\nPaginated responses include a top-level `pagination` object alongside `data`. By default, the API returns 50 items per page.\nThe page number can be specified using the `page` query parameter, for example: `/core/v1/public/mailboxes?page=2`.\n\n```json\n{\n  \"data\": [],\n  \"pagination\": {\n    \"page\": 1,\n    \"perPage\": 25,\n    \"total\": 137,\n    \"totalPages\": 6\n  }\n}\n```\n\n# Errors\nAll `4xx` and `5xx` responses share a single envelope. Always parse `code` for programmatic handling; `error` is a human-readable message intended for logs and support tickets.\n\n```json\n{\n  \"error\": \"Mailbox not found.\",\n  \"code\": \"ERR_MAILBOX_NOT_FOUND\",\n  \"params\": {}\n}\n```\n\n# AI agents (MCP)\nWant to read or send your email from Claude, Cursor, ChatGPT, or any other AI assistant? Hostinger ships an MCP (Model Context Protocol) server that wraps this API:\n\n```\nhttps://mcp.mail.hostinger.com/mcp\n```\n\nUse the same API token from the Hostinger Panel. Your agent only reaches what the token permits — order-scoped, optionally restricted to specific mailboxes within the order.\n\n<details>\n<summary><strong>Claude Code (CLI)</strong></summary>\n\n```bash\nclaude mcp add --scope user --transport http \\\n  --header \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\" \\\n  -- hostinger-email https://mcp.mail.hostinger.com/mcp\n```\n\n</details>\n\n<details>\n<summary><strong>Claude Desktop</strong></summary>\n\nClaude Desktop connects to MCP servers via stdio. Use the `mcp-remote` bridge to talk to our HTTP server. Requires Node.js (`npx` ships with it).\n\nEdit the Claude Desktop config file. Path depends on your OS:\n\n- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`\n- **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`\n- **Linux:** `~/.config/Claude/claude_desktop_config.json`\n\nSet the contents to:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.mail.hostinger.com/mcp\",\n        \"--header\",\n        \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\"\n      ]\n    }\n  }\n}\n```\n\nQuit Claude Desktop fully (not just close the window) and reopen it. The connector icon should appear in the message composer.\n\nIf you have Claude Desktop's paid \"Custom Connectors\" feature, you can skip the `mcp-remote` bridge entirely and add the HTTP URL directly via the in-app UI:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\n</details>\n\n<details>\n<summary><strong>Cursor</strong></summary>\n\nCreate or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` in your project root:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\nRestart Cursor. The server is also configurable via `Cmd-Shift-P` → `View: Open MCP Settings` (newer Cursor versions).\n\n</details>\n\n<details>\n<summary><strong>What can the agent do?</strong></summary>\n\nSame as this REST API — read, search, send, move, flag, delete messages; list folders and mailboxes; manage webhooks. The agent calls these endpoints under the hood using your API token.\n\nThe agent only reaches what your token permits. Tokens are scoped to a single Hostinger order, and you can further restrict each token to specific mailboxes within that order when generating it in the Panel.\n\n</details>",
-        "version": "1.0.3"
+        "description": "# Overview\nThe Hostinger Mail API provides a set of endpoints that allow developers to manage Hostinger Email programmatically.\nThis API enables you to manage mailboxes and related resources tied to your Hostinger account.\n\nThe API is (mostly) RESTful and uses standard HTTP methods and status codes.\n\n# Official SDKs\nIntegrate the Hostinger Mail API in minutes using official, idiomatic SDKs - no more hand-rolling HTTP calls.\nPublished to native package managers, so it's a one-line install.\n\n- **PHP** - `composer require hostinger/mail-api-php-sdk` ([GitHub](https://github.com/hostinger/mail-api-php-sdk))\n- **TypeScript / Node.js** - `npm install hostinger-mail-api-sdk` ([GitHub](https://github.com/hostinger/mail-api-typescript-sdk))\n- **Python** - `pip install hostinger-mail-api` ([GitHub](https://github.com/hostinger/mail-api-python-sdk))\n- **CLI** - `brew install hostinger/tap/hostinger-mail` ([GitHub](https://github.com/hostinger/mail-api-cli))\n\n# AI agents (MCP)\nWant to read or send your email from Claude, Cursor, ChatGPT, or any other AI assistant? Hostinger ships an MCP (Model Context Protocol) server that wraps this API:\n\n```\nhttps://mcp.mail.hostinger.com/mcp\n```\n\nUse the same API token from the Hostinger Panel. Your agent only reaches what the token permits — order-scoped, optionally restricted to specific mailboxes within the order.\n\n<details>\n<summary><strong>Claude Code (CLI)</strong></summary>\n\n```bash\nclaude mcp add --scope user --transport http \\\n  --header \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\" \\\n  -- hostinger-email https://mcp.mail.hostinger.com/mcp\n```\n\n</details>\n\n<details>\n<summary><strong>Claude Desktop</strong></summary>\n\nClaude Desktop connects to MCP servers via stdio. Use the `mcp-remote` bridge to talk to our HTTP server. Requires Node.js (`npx` ships with it).\n\nEdit the Claude Desktop config file. Path depends on your OS:\n\n- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`\n- **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`\n- **Linux:** `~/.config/Claude/claude_desktop_config.json`\n\nSet the contents to:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.mail.hostinger.com/mcp\",\n        \"--header\",\n        \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\"\n      ]\n    }\n  }\n}\n```\n\nQuit Claude Desktop fully (not just close the window) and reopen it. The connector icon should appear in the message composer.\n\nIf you have Claude Desktop's paid \"Custom Connectors\" feature, you can skip the `mcp-remote` bridge entirely and add the HTTP URL directly via the in-app UI:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\n</details>\n\n<details>\n<summary><strong>Cursor</strong></summary>\n\nCreate or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` in your project root:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\nRestart Cursor. The server is also configurable via `Cmd-Shift-P` → `View: Open MCP Settings` (newer Cursor versions).\n\n</details>\n\n<details>\n<summary><strong>What can the agent do?</strong></summary>\n\nSame as this REST API — read, search, send, move, flag, delete messages; list folders and mailboxes; manage webhooks. The agent calls these endpoints under the hood using your API token.\n\nThe agent only reaches what your token permits. Tokens are scoped to a single Hostinger order, and you can further restrict each token to specific mailboxes within that order when generating it in the Panel.\n\n</details>\n\n# Other plugins\n- **ChatGPT plugin** - read and send your Hostinger email straight from ChatGPT ([Open](https://chatgpt.com/plugins/plugin_asdk_app_6a323a8a890c819190480c9044395170))\n\n# Authentication\nThe API uses tokens for authentication. To authenticate your requests, you need to include a valid bearer token in the `Authorization` header of your HTTP requests:\n\n```yaml\nAuthorization: Bearer YOUR_API_TOKEN\n```\n\nAPI tokens can be created and managed from the email provisioning tab in the Hostinger Panel.\nTokens are scoped to a single order; their permissions are limited to that order.\n\nOnly mailboxes belonging to the order can be accessed and managed by an API token.\n\n# Rate Limiting\nTo ensure fair usage and prevent abuse, the API enforces rate limits on the number of requests that can be made within a certain time period.\nIf you exceed the rate limit, you will receive a `429 Too Many Requests` response.\nYour IP address might get temporarily blocked if you exceed the rate limit multiple times.\n\n# Parameters\nAll requests sent to the API must have the content type `application/json`.\n`POST`, `PUT`, `PATCH` methods may include a JSON object in the request body.\nDocumentation provides the required structure and examples of the object.\nSome endpoints require path parameters.\nThese parameters are included in the URL path and are marked with curly braces.\n\n# Response envelope\nAll non-`204` responses wrap the payload in a top-level `data` field.\n\nSingle resource:\n\n```json\n{\n  \"data\": {\n    \"resourceId\": \"AC1a2b3c4d5e6f7g\",\n    \"address\": \"user@example.com\"\n  }\n}\n```\n\nCollection (empty or otherwise):\n\n```json\n{\n  \"data\": []\n}\n```\n\n# Pagination\nPaginated responses include a top-level `pagination` object alongside `data`. By default, the API returns 50 items per page.\nThe page number can be specified using the `page` query parameter, for example: `/core/v1/public/mailboxes?page=2`.\n\n```json\n{\n  \"data\": [],\n  \"pagination\": {\n    \"page\": 1,\n    \"perPage\": 25,\n    \"total\": 137,\n    \"totalPages\": 6\n  }\n}\n```\n\n# Errors\nAll `4xx` and `5xx` responses share a single envelope. Always parse `code` for programmatic handling; `error` is a human-readable message intended for logs and support tickets.\n\n```json\n{\n  \"error\": \"Mailbox not found.\",\n  \"code\": \"ERR_MAILBOX_NOT_FOUND\",\n  \"params\": {}\n}\n```",
+        "version": "1.1.0"
     },
     "servers": [
         {
@@ -2035,13 +2035,13 @@
                             "type": "integer",
                             "minimum": 1
                         },
-                        "maxItems": 100,
-                        "minItems": 1,
                         "example": [
                             42,
                             43,
                             44
-                        ]
+                        ],
+                        "maxItems": 100,
+                        "minItems": 1
                     }
                 },
                 "type": "object"
@@ -2059,21 +2059,21 @@
                             "type": "integer",
                             "minimum": 1
                         },
-                        "maxItems": 100,
-                        "minItems": 1,
                         "example": [
                             42,
                             43,
                             44
-                        ]
+                        ],
+                        "maxItems": 100,
+                        "minItems": 1
                     },
                     "addFlags": {
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "\\Seen",
                             "maxLength": 255,
-                            "minLength": 1,
-                            "example": "\\Seen"
+                            "minLength": 1
                         },
                         "example": [
                             "\\Seen",
@@ -2085,9 +2085,9 @@
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "\\Seen",
                             "maxLength": 255,
-                            "minLength": 1,
-                            "example": "\\Seen"
+                            "minLength": 1
                         },
                         "example": [
                             "\\Seen"
@@ -2103,9 +2103,9 @@
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "\\Seen",
                             "maxLength": 255,
-                            "minLength": 1,
-                            "example": "\\Seen"
+                            "minLength": 1
                         },
                         "example": [
                             "\\Seen",
@@ -2117,9 +2117,9 @@
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "\\Seen",
                             "maxLength": 255,
-                            "minLength": 1,
-                            "example": "\\Seen"
+                            "minLength": 1
                         },
                         "example": [
                             "\\Seen"
@@ -2332,20 +2332,20 @@
                             "type": "integer",
                             "minimum": 1
                         },
-                        "maxItems": 100,
-                        "minItems": 1,
                         "example": [
                             42,
                             43,
                             44
-                        ]
+                        ],
+                        "maxItems": 100,
+                        "minItems": 1
                     },
                     "targetFolder": {
                         "description": "Destination folder path.",
                         "type": "string",
+                        "example": "INBOX.Sent",
                         "maxLength": 100,
-                        "minLength": 1,
-                        "example": "INBOX.Sent"
+                        "minLength": 1
                     }
                 },
                 "type": "object"
@@ -2359,9 +2359,9 @@
                     "targetFolder": {
                         "description": "Destination folder path.",
                         "type": "string",
+                        "example": "INBOX.Sent",
                         "maxLength": 100,
-                        "minLength": 1,
-                        "example": "INBOX.Sent"
+                        "minLength": 1
                     }
                 },
                 "type": "object"
@@ -2395,9 +2395,9 @@
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "\\Seen",
                             "maxLength": 255,
-                            "minLength": 1,
-                            "example": "\\Seen"
+                            "minLength": 1
                         },
                         "example": [
                             "\\Seen",
@@ -2410,48 +2410,48 @@
                     },
                     "subject": {
                         "type": "string",
-                        "maxLength": 1024,
-                        "example": "meeting"
+                        "example": "meeting",
+                        "maxLength": 1024
                     },
                     "from": {
                         "type": "string",
-                        "maxLength": 320,
-                        "example": "john@example.com"
+                        "example": "john@example.com",
+                        "maxLength": 320
                     },
                     "to": {
                         "type": "string",
-                        "maxLength": 320,
-                        "example": "jane@example.com"
+                        "example": "jane@example.com",
+                        "maxLength": 320
                     },
                     "cc": {
                         "type": "string",
-                        "maxLength": 320,
-                        "example": "team@example.com"
+                        "example": "team@example.com",
+                        "maxLength": 320
                     },
                     "body": {
                         "type": "string",
-                        "maxLength": 1024,
-                        "example": "important"
+                        "example": "important",
+                        "maxLength": 1024
                     },
                     "header": {
                         "type": "string",
-                        "maxLength": 1024,
-                        "example": "X-Custom-Header:value"
+                        "example": "X-Custom-Header:value",
+                        "maxLength": 1024
                     },
                     "larger": {
                         "type": "integer",
-                        "minimum": 0,
-                        "example": 1024
+                        "example": 1024,
+                        "minimum": 0
                     },
                     "smaller": {
                         "type": "integer",
-                        "minimum": 0,
-                        "example": 1048576
+                        "example": 1048576,
+                        "minimum": 0
                     },
                     "text": {
                         "type": "string",
-                        "maxLength": 1024,
-                        "example": "urgent"
+                        "example": "urgent",
+                        "maxLength": 1024
                     }
                 },
                 "type": "object"
@@ -2532,9 +2532,9 @@
                     "name": {
                         "description": "Folder name. Length 1-100 after trimming.",
                         "type": "string",
+                        "example": "Projects",
                         "maxLength": 100,
-                        "minLength": 1,
-                        "example": "Projects"
+                        "minLength": 1
                     }
                 },
                 "type": "object"
@@ -2605,9 +2605,9 @@
                     "name": {
                         "description": "New folder name. Length 1-100 after trimming.",
                         "type": "string",
+                        "example": "Archive",
                         "maxLength": 100,
-                        "minLength": 1,
-                        "example": "Archive"
+                        "minLength": 1
                     }
                 },
                 "type": "object"
@@ -2749,6 +2749,26 @@
                 },
                 "type": "object"
             },
+            "V1.Send.MessageRef": {
+                "description": "Reference to a source message by UID within a folder, used for reply/forward threading. Both fields are required.",
+                "required": [
+                    "uid",
+                    "folder"
+                ],
+                "properties": {
+                    "uid": {
+                        "description": "UID of the source message.",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "folder": {
+                        "description": "Folder containing the source message.",
+                        "type": "string",
+                        "example": "INBOX"
+                    }
+                },
+                "type": "object"
+            },
             "V1.Send.Attachment": {
                 "description": "Attachment payload for outgoing mail. Supports regular attachments and inline images linked via Content-ID.",
                 "required": [
@@ -2836,6 +2856,22 @@
                         "items": {
                             "$ref": "#/components/schemas/V1.Send.Attachment"
                         }
+                    },
+                    "inReplyTo": {
+                        "description": "Source message this is a reply to. Copies its Message-Id/References into In-Reply-To/References and flags it \\Answered. Mutually exclusive with forwardOf.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/V1.Send.MessageRef"
+                            }
+                        ]
+                    },
+                    "forwardOf": {
+                        "description": "Source message this forwards. Copies its Message-Id/References into In-Reply-To/References and flags it $forwarded. Mutually exclusive with inReplyTo.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/V1.Send.MessageRef"
+                            }
+                        ]
                     }
                 },
                 "type": "object",
@@ -2886,8 +2922,8 @@
                 "properties": {
                     "name": {
                         "type": "string",
-                        "maxLength": 255,
-                        "example": "New message notifier"
+                        "example": "New message notifier",
+                        "maxLength": 255
                     },
                     "description": {
                         "type": "string",
@@ -2908,19 +2944,19 @@
                     },
                     "status": {
                         "type": "string",
+                        "example": "active",
                         "default": "active",
                         "enum": [
                             "active",
                             "paused",
                             "disabled"
-                        ],
-                        "example": "active"
+                        ]
                     },
                     "url": {
                         "type": "string",
                         "format": "uri",
-                        "maxLength": 2048,
-                        "example": "https://example.com/webhooks/incoming"
+                        "example": "https://example.com/webhooks/incoming",
+                        "maxLength": 2048
                     }
                 },
                 "type": "object"
@@ -2984,8 +3020,8 @@
                 "properties": {
                     "name": {
                         "type": "string",
-                        "maxLength": 255,
-                        "example": "Renamed webhook"
+                        "example": "Renamed webhook",
+                        "maxLength": 255
                     },
                     "description": {
                         "type": "string",
@@ -3000,25 +3036,25 @@
                                 "message.received"
                             ]
                         },
-                        "minItems": 1,
                         "example": [
                             "message.received"
-                        ]
+                        ],
+                        "minItems": 1
                     },
                     "status": {
                         "type": "string",
+                        "example": "paused",
                         "enum": [
                             "active",
                             "paused",
                             "disabled"
-                        ],
-                        "example": "paused"
+                        ]
                     },
                     "url": {
                         "type": "string",
                         "format": "uri",
-                        "maxLength": 2048,
-                        "example": "https://example.com/webhooks/new"
+                        "example": "https://example.com/webhooks/new",
+                        "maxLength": 2048
                     }
                 },
                 "type": "object"
@@ -3057,8 +3093,8 @@
                     },
                     "name": {
                         "type": "string",
-                        "maxLength": 255,
-                        "example": "New message notifier"
+                        "example": "New message notifier",
+                        "maxLength": 255
                     },
                     "description": {
                         "type": "string",
@@ -3069,26 +3105,26 @@
                         "type": "array",
                         "items": {
                             "type": "string",
+                            "example": "message.received",
                             "enum": [
                                 "message.received"
-                            ],
-                            "example": "message.received"
+                            ]
                         }
                     },
                     "status": {
                         "type": "string",
+                        "example": "active",
                         "enum": [
                             "active",
                             "paused",
                             "disabled"
-                        ],
-                        "example": "active"
+                        ]
                     },
                     "url": {
                         "type": "string",
                         "format": "uri",
-                        "maxLength": 2048,
-                        "example": "https://example.com/webhooks/incoming"
+                        "example": "https://example.com/webhooks/incoming",
+                        "maxLength": 2048
                     },
                     "createdAt": {
                         "type": "string",
