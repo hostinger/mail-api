@@ -1,3 +1,11 @@
+## v1.2.2 - 2026-10-09
+
+# API Changelog 1.2.1 vs. 1.2.2
+
+No changes to report, but the specs are different
+
+
+
 ## v1.2.1 - 2026-10-09
 
 # API Changelog 1.1.0 vs. 1.2.1

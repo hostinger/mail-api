@@ -3,7 +3,7 @@
     "info": {
         "title": "Hostinger Mail API",
         "description": "# Overview\nThe Hostinger Mail API provides a set of endpoints that allow developers to manage Hostinger Email programmatically.\nThis API enables you to manage mailboxes and related resources tied to your Hostinger account.\n\nThe API is (mostly) RESTful and uses standard HTTP methods and status codes.\n\n# Official SDKs\nIntegrate the Hostinger Mail API in minutes using official, idiomatic SDKs - no more hand-rolling HTTP calls.\nPublished to native package managers, so it's a one-line install.\n\n- **PHP** - `composer require hostinger/mail-api-php-sdk` ([GitHub](https://github.com/hostinger/mail-api-php-sdk))\n- **TypeScript / Node.js** - `npm install hostinger-mail-api-sdk` ([GitHub](https://github.com/hostinger/mail-api-typescript-sdk))\n- **Python** - `pip install hostinger-mail-api` ([GitHub](https://github.com/hostinger/mail-api-python-sdk))\n- **CLI** - `brew install hostinger/tap/hostinger-mail` ([GitHub](https://github.com/hostinger/mail-api-cli))\n\n# AI agents (MCP)\nWant to read or send your email from Claude, Cursor, ChatGPT, or any other AI assistant? Hostinger ships an MCP (Model Context Protocol) server that wraps this API:\n\n```\nhttps://mcp.mail.hostinger.com/mcp\n```\n\nUse the same API token from the Hostinger Panel. Your agent only reaches what the token permits — order-scoped, optionally restricted to specific mailboxes within the order.\n\n<details>\n<summary><strong>Claude Code (CLI)</strong></summary>\n\n```bash\nclaude mcp add --scope user --transport http \\\n  --header \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\" \\\n  -- hostinger-email https://mcp.mail.hostinger.com/mcp\n```\n\n</details>\n\n<details>\n<summary><strong>Claude Desktop</strong></summary>\n\nClaude Desktop connects to MCP servers via stdio. Use the `mcp-remote` bridge to talk to our HTTP server. Requires Node.js (`npx` ships with it).\n\nEdit the Claude Desktop config file. Path depends on your OS:\n\n- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`\n- **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`\n- **Linux:** `~/.config/Claude/claude_desktop_config.json`\n\nSet the contents to:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.mail.hostinger.com/mcp\",\n        \"--header\",\n        \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\"\n      ]\n    }\n  }\n}\n```\n\nQuit Claude Desktop fully (not just close the window) and reopen it. The connector icon should appear in the message composer.\n\nIf you have Claude Desktop's paid \"Custom Connectors\" feature, you can skip the `mcp-remote` bridge entirely and add the HTTP URL directly via the in-app UI:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\n</details>\n\n<details>\n<summary><strong>Cursor</strong></summary>\n\nCreate or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` in your project root:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\nRestart Cursor. The server is also configurable via `Cmd-Shift-P` → `View: Open MCP Settings` (newer Cursor versions).\n\n</details>\n\n<details>\n<summary><strong>What can the agent do?</strong></summary>\n\nSame as this REST API — read, search, send, move, flag, delete messages; list folders and mailboxes; manage webhooks. The agent calls these endpoints under the hood using your API token.\n\nThe agent only reaches what your token permits. Tokens are scoped to a single Hostinger order, and you can further restrict each token to specific mailboxes within that order when generating it in the Panel.\n\n</details>\n\n# Other plugins\n- **ChatGPT plugin** - read and send your Hostinger email straight from ChatGPT ([Open](https://chatgpt.com/plugins/plugin_asdk_app_6a323a8a890c819190480c9044395170))\n\n# Feedback from integrations and AI agents\nSomething did not work, was slow, or is missing? Tell the Hostinger mail team directly from your code or your agent: `POST /api/v1/mailboxes/{mailboxResourceId}/feedback` (MCP tool `email_report_feedback`) with a `score` (1-10) and a short `message`. Reports reach the team's feedback channel within minutes.\n\nReport when a call returned `4xx`/`5xx` or unexpected data, when a response was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and the status code you received so the team can find the request. Never include tokens, passwords or email contents: messages are scrubbed of secrets and capped at 2000 characters. Send one report per distinct issue.\n\n# Authentication\nThe API uses tokens for authentication. To authenticate your requests, you need to include a valid bearer token in the `Authorization` header of your HTTP requests:\n\n```yaml\nAuthorization: Bearer YOUR_API_TOKEN\n```\n\nAPI tokens can be created and managed from the email provisioning tab in the Hostinger Panel.\nTokens are scoped to a single order; their permissions are limited to that order.\n\nOnly mailboxes belonging to the order can be accessed and managed by an API token.\n\n# Rate Limiting\nTo ensure fair usage and prevent abuse, the API enforces rate limits on the number of requests that can be made within a certain time period.\nIf you exceed the rate limit, you will receive a `429 Too Many Requests` response.\nYour IP address might get temporarily blocked if you exceed the rate limit multiple times.\n\n# Parameters\nAll requests sent to the API must have the content type `application/json`.\n`POST`, `PUT`, `PATCH` methods may include a JSON object in the request body.\nDocumentation provides the required structure and examples of the object.\nSome endpoints require path parameters.\nThese parameters are included in the URL path and are marked with curly braces.\n\n# Response envelope\nAll non-`204` responses wrap the payload in a top-level `data` field.\n\nSingle resource:\n\n```json\n{\n  \"data\": {\n    \"resourceId\": \"AC1a2b3c4d5e6f7g\",\n    \"address\": \"user@example.com\"\n  }\n}\n```\n\nCollection (empty or otherwise):\n\n```json\n{\n  \"data\": []\n}\n```\n\n# Pagination\nPaginated responses include a top-level `pagination` object alongside `data`. By default, the API returns 50 items per page.\nThe page number can be specified using the `page` query parameter, for example: `/core/v1/public/mailboxes?page=2`.\n\n```json\n{\n  \"data\": [],\n  \"pagination\": {\n    \"page\": 1,\n    \"perPage\": 25,\n    \"total\": 137,\n    \"totalPages\": 6\n  }\n}\n```\n\n# Errors\nAll `4xx` and `5xx` responses share a single envelope. Always parse `code` for programmatic handling; `error` is a human-readable message intended for logs and support tickets.\n\n```json\n{\n  \"error\": \"Mailbox not found.\",\n  \"code\": \"ERR_MAILBOX_NOT_FOUND\",\n  \"params\": {}\n}\n```",
-        "version": "1.2.1"
+        "version": "1.2.2"
     },
     "servers": [
         {
@@ -17,7 +17,7 @@
                     "Feedback"
                 ],
                 "summary": "Submit feedback",
-                "description": "Report a problem or suggestion about this API or the MCP server to the Hostinger mail team.\n\nReport when a call returned 4xx/5xx or unexpected data, was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and the status code you received so the team can find the request. Never include tokens, passwords or email contents: the message is scrubbed of secrets and capped at 2000 characters. Send one report per distinct issue.\n\nA `429` (`ERR_FEEDBACK_RATE_LIMIT`) means feedback for this customer was submitted less than ten seconds ago; wait and retry.",
+                "description": "Send the user's feedback about the Hostinger Email API to the Hostinger mail team.\n\nOnly call this when the user explicitly asks to send feedback, report a problem, or request a feature. Send the user's own words; never include tokens, passwords or email contents. The message is capped at 2000 characters.\n\nA `429` (`ERR_FEEDBACK_RATE_LIMIT`) means feedback for this customer was submitted less than ten seconds ago; wait and retry.",
                 "operationId": "submitFeedback",
                 "parameters": [
                     {
@@ -769,7 +769,10 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "x-mcp": {
+                    "readOnlyHint": false
+                }
             }
         },
         "/api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/{uid}/move": {
@@ -1029,7 +1032,7 @@
                 "tags": [
                     "Messages"
                 ],
-                "summary": "Update message flags",
+                "summary": "Update flags on multiple messages",
                 "description": "Add and/or remove flags on multiple messages. Returns 200 when all UIDs succeed, 207 with per-UID outcome when some fail.",
                 "operationId": "updateMessageFlags",
                 "parameters": [
@@ -1532,7 +1535,10 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "x-mcp": {
+                    "openWorldHint": true
+                }
             }
         },
         "/api/v1/mailboxes/{mailboxResourceId}/webhooks": {
@@ -1685,7 +1691,10 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "x-mcp": {
+                    "openWorldHint": true
+                }
             }
         },
         "/api/v1/mailboxes/{mailboxResourceId}/webhooks/{webhook}": {
@@ -1882,7 +1891,10 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "x-mcp": {
+                    "openWorldHint": true
+                }
             }
         },
         "/api/v1/mailboxes/{mailboxResourceId}/webhooks/{webhook}/regenerate-secret": {
@@ -2012,7 +2024,10 @@
                     {
                         "BearerAuth": []
                     }
-                ]
+                ],
+                "x-mcp": {
+                    "openWorldHint": true
+                }
             }
         }
     },
@@ -2076,23 +2091,23 @@
                 "type": "object"
             },
             "V1.Feedback.SubmitRequest": {
-                "description": "Feedback about the Mail API or the MCP server. The message is scrubbed of tokens, JWTs and key/secret/password values before validation and storage, so the length limit applies to the scrubbed text.",
+                "description": "Feedback the user wants to send to the Hostinger mail team. The message is scrubbed of tokens, JWTs and key/secret/password values before validation and storage, so the length limit applies to the scrubbed text.",
                 "required": [
                     "score",
                     "message"
                 ],
                 "properties": {
                     "score": {
-                        "description": "How well the API served the task: 1 (poor) to 10 (excellent).",
+                        "description": "The user's rating of the Hostinger Email API: 1 (poor) to 10 (excellent).",
                         "type": "integer",
                         "example": 3,
                         "maximum": 10,
                         "minimum": 1
                     },
                     "message": {
-                        "description": "What happened and what was expected, including the operation and status code involved. Never include tokens, passwords or email contents.",
+                        "description": "The user's feedback in their own words. Never include tokens, passwords or email contents.",
                         "type": "string",
-                        "example": "POST /api/v1/mailboxes/{mailboxResourceId}/send returned 502 after 30 seconds for a message with a 10 MB attachment.",
+                        "example": "Sending a message with a 10 MB attachment fails with a timeout.",
                         "maxLength": 2000
                     }
                 },
@@ -3477,5 +3492,5 @@
             "description": "Report problems or suggestions about this API or the MCP server. Report after a call failed or returned unexpected data, when documentation was missing or unclear, when a response was too slow, or when a capability you need does not exist. Mention the failing operation and status code in the message; never include tokens or email contents."
         }
     ],
-    "x-mcp-instructions": "Hostinger Mail API access — use this server when the user wants to read, search, send, organize, or manage email in their Hostinger mailbox(es), or manage email webhooks.\n\nCapabilities:\n- List mailboxes belonging to the authenticated Hostinger order\n- List folders inside a mailbox (Inbox, Sent, Drafts, Trash, custom)\n- List, search, fetch, move, delete, flag messages\n- Read message body (text/HTML), full RFC822 source, attachments\n- Send email from a mailbox\n- Manage webhooks (create, list, test, regenerate secret, delete)\n- Report feedback about this API or the MCP server (`POST /api/v1/mailboxes/{mailboxResourceId}/feedback`)\n\nMailbox discovery: there is no standalone \"list mailboxes\" endpoint. Call `GET /api/v1/me` first — the response contains `data.mailboxes[]` with each mailbox's `resourceId` and `address`. Use that `resourceId` as `mailboxResourceId` in every other endpoint.\n\nWorkflow:\n1. Discover endpoints (optionally filter by tag: \"Messages\", \"Mailboxes\", \"Folders\", \"Webhooks\", \"Send\").\n2. Inspect the operation schema (parameters, request body, responses).\n3. Execute the call. Path templates use `{placeholder}` substitution.\n\nAuth: each request must carry `Authorization: Bearer <customer-Hostinger-token>`. Tokens are scoped to one Hostinger order and may be further restricted to specific mailboxes within that order — assume access is partial unless verified.\n\nWhen to report feedback: call `POST /api/v1/mailboxes/{mailboxResourceId}/feedback` when a call returned 4xx/5xx or unexpected data, was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and its status code in the message. Keep the message under 2000 characters, never include tokens, passwords or email contents, and send one report per distinct issue."
+    "x-mcp-instructions": "Hostinger Mail API access — use this server when the user wants to read, search, send, organize, or manage email in their Hostinger mailbox(es), or manage email webhooks.\n\nCapabilities:\n- List mailboxes belonging to the authenticated Hostinger order\n- List folders inside a mailbox (Inbox, Sent, Drafts, Trash, custom)\n- List, search, fetch, move, delete, flag messages\n- Read message body (text/HTML), full RFC822 source, attachments\n- Send email from a mailbox\n- Manage webhooks (create, list, test, regenerate secret, delete)\n- Send the user's feedback about this API to the Hostinger mail team (`POST /api/v1/mailboxes/{mailboxResourceId}/feedback`)\n\nMailbox discovery: there is no standalone \"list mailboxes\" endpoint. Call `GET /api/v1/me` first — the response contains `data.mailboxes[]` with each mailbox's `resourceId` and `address`. Use that `resourceId` as `mailboxResourceId` in every other endpoint.\n\nEvery operation is exposed as its own tool; use only the tools that are listed. Path templates use `{placeholder}` substitution.\n\nAuth: each request must carry `Authorization: Bearer <customer-Hostinger-token>`. Tokens are scoped to one Hostinger order and may be further restricted to specific mailboxes within that order — assume access is partial unless verified.\n\nFeedback: only call `POST /api/v1/mailboxes/{mailboxResourceId}/feedback` when the user explicitly asks to send feedback, report a problem, or request a feature. Send the user's own words, keep it under 2000 characters, and never include tokens, passwords or email contents."
 }
