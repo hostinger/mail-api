@@ -1,3 +1,23 @@
+## v1.2.1 - 2026-10-09
+
+# API Changelog 1.1.0 vs. 1.2.1
+
+
+## API Changes
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/feedback
+-  endpoint added
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/send
+-  added the non-success response with the status `504`
+
+
+
+
+
+
+
 ## v1.1.0 - 2026-07-21
 
 # API Changelog 1.0.3 vs. 1.1.0

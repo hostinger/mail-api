@@ -2,8 +2,8 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Hostinger Mail API",
-        "description": "# Overview\nThe Hostinger Mail API provides a set of endpoints that allow developers to manage Hostinger Email programmatically.\nThis API enables you to manage mailboxes and related resources tied to your Hostinger account.\n\nThe API is (mostly) RESTful and uses standard HTTP methods and status codes.\n\n# Official SDKs\nIntegrate the Hostinger Mail API in minutes using official, idiomatic SDKs - no more hand-rolling HTTP calls.\nPublished to native package managers, so it's a one-line install.\n\n- **PHP** - `composer require hostinger/mail-api-php-sdk` ([GitHub](https://github.com/hostinger/mail-api-php-sdk))\n- **TypeScript / Node.js** - `npm install hostinger-mail-api-sdk` ([GitHub](https://github.com/hostinger/mail-api-typescript-sdk))\n- **Python** - `pip install hostinger-mail-api` ([GitHub](https://github.com/hostinger/mail-api-python-sdk))\n- **CLI** - `brew install hostinger/tap/hostinger-mail` ([GitHub](https://github.com/hostinger/mail-api-cli))\n\n# AI agents (MCP)\nWant to read or send your email from Claude, Cursor, ChatGPT, or any other AI assistant? Hostinger ships an MCP (Model Context Protocol) server that wraps this API:\n\n```\nhttps://mcp.mail.hostinger.com/mcp\n```\n\nUse the same API token from the Hostinger Panel. Your agent only reaches what the token permits — order-scoped, optionally restricted to specific mailboxes within the order.\n\n<details>\n<summary><strong>Claude Code (CLI)</strong></summary>\n\n```bash\nclaude mcp add --scope user --transport http \\\n  --header \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\" \\\n  -- hostinger-email https://mcp.mail.hostinger.com/mcp\n```\n\n</details>\n\n<details>\n<summary><strong>Claude Desktop</strong></summary>\n\nClaude Desktop connects to MCP servers via stdio. Use the `mcp-remote` bridge to talk to our HTTP server. Requires Node.js (`npx` ships with it).\n\nEdit the Claude Desktop config file. Path depends on your OS:\n\n- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`\n- **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`\n- **Linux:** `~/.config/Claude/claude_desktop_config.json`\n\nSet the contents to:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.mail.hostinger.com/mcp\",\n        \"--header\",\n        \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\"\n      ]\n    }\n  }\n}\n```\n\nQuit Claude Desktop fully (not just close the window) and reopen it. The connector icon should appear in the message composer.\n\nIf you have Claude Desktop's paid \"Custom Connectors\" feature, you can skip the `mcp-remote` bridge entirely and add the HTTP URL directly via the in-app UI:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\n</details>\n\n<details>\n<summary><strong>Cursor</strong></summary>\n\nCreate or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` in your project root:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\nRestart Cursor. The server is also configurable via `Cmd-Shift-P` → `View: Open MCP Settings` (newer Cursor versions).\n\n</details>\n\n<details>\n<summary><strong>What can the agent do?</strong></summary>\n\nSame as this REST API — read, search, send, move, flag, delete messages; list folders and mailboxes; manage webhooks. The agent calls these endpoints under the hood using your API token.\n\nThe agent only reaches what your token permits. Tokens are scoped to a single Hostinger order, and you can further restrict each token to specific mailboxes within that order when generating it in the Panel.\n\n</details>\n\n# Other plugins\n- **ChatGPT plugin** - read and send your Hostinger email straight from ChatGPT ([Open](https://chatgpt.com/plugins/plugin_asdk_app_6a323a8a890c819190480c9044395170))\n\n# Authentication\nThe API uses tokens for authentication. To authenticate your requests, you need to include a valid bearer token in the `Authorization` header of your HTTP requests:\n\n```yaml\nAuthorization: Bearer YOUR_API_TOKEN\n```\n\nAPI tokens can be created and managed from the email provisioning tab in the Hostinger Panel.\nTokens are scoped to a single order; their permissions are limited to that order.\n\nOnly mailboxes belonging to the order can be accessed and managed by an API token.\n\n# Rate Limiting\nTo ensure fair usage and prevent abuse, the API enforces rate limits on the number of requests that can be made within a certain time period.\nIf you exceed the rate limit, you will receive a `429 Too Many Requests` response.\nYour IP address might get temporarily blocked if you exceed the rate limit multiple times.\n\n# Parameters\nAll requests sent to the API must have the content type `application/json`.\n`POST`, `PUT`, `PATCH` methods may include a JSON object in the request body.\nDocumentation provides the required structure and examples of the object.\nSome endpoints require path parameters.\nThese parameters are included in the URL path and are marked with curly braces.\n\n# Response envelope\nAll non-`204` responses wrap the payload in a top-level `data` field.\n\nSingle resource:\n\n```json\n{\n  \"data\": {\n    \"resourceId\": \"AC1a2b3c4d5e6f7g\",\n    \"address\": \"user@example.com\"\n  }\n}\n```\n\nCollection (empty or otherwise):\n\n```json\n{\n  \"data\": []\n}\n```\n\n# Pagination\nPaginated responses include a top-level `pagination` object alongside `data`. By default, the API returns 50 items per page.\nThe page number can be specified using the `page` query parameter, for example: `/core/v1/public/mailboxes?page=2`.\n\n```json\n{\n  \"data\": [],\n  \"pagination\": {\n    \"page\": 1,\n    \"perPage\": 25,\n    \"total\": 137,\n    \"totalPages\": 6\n  }\n}\n```\n\n# Errors\nAll `4xx` and `5xx` responses share a single envelope. Always parse `code` for programmatic handling; `error` is a human-readable message intended for logs and support tickets.\n\n```json\n{\n  \"error\": \"Mailbox not found.\",\n  \"code\": \"ERR_MAILBOX_NOT_FOUND\",\n  \"params\": {}\n}\n```",
-        "version": "1.1.0"
+        "description": "# Overview\nThe Hostinger Mail API provides a set of endpoints that allow developers to manage Hostinger Email programmatically.\nThis API enables you to manage mailboxes and related resources tied to your Hostinger account.\n\nThe API is (mostly) RESTful and uses standard HTTP methods and status codes.\n\n# Official SDKs\nIntegrate the Hostinger Mail API in minutes using official, idiomatic SDKs - no more hand-rolling HTTP calls.\nPublished to native package managers, so it's a one-line install.\n\n- **PHP** - `composer require hostinger/mail-api-php-sdk` ([GitHub](https://github.com/hostinger/mail-api-php-sdk))\n- **TypeScript / Node.js** - `npm install hostinger-mail-api-sdk` ([GitHub](https://github.com/hostinger/mail-api-typescript-sdk))\n- **Python** - `pip install hostinger-mail-api` ([GitHub](https://github.com/hostinger/mail-api-python-sdk))\n- **CLI** - `brew install hostinger/tap/hostinger-mail` ([GitHub](https://github.com/hostinger/mail-api-cli))\n\n# AI agents (MCP)\nWant to read or send your email from Claude, Cursor, ChatGPT, or any other AI assistant? Hostinger ships an MCP (Model Context Protocol) server that wraps this API:\n\n```\nhttps://mcp.mail.hostinger.com/mcp\n```\n\nUse the same API token from the Hostinger Panel. Your agent only reaches what the token permits — order-scoped, optionally restricted to specific mailboxes within the order.\n\n<details>\n<summary><strong>Claude Code (CLI)</strong></summary>\n\n```bash\nclaude mcp add --scope user --transport http \\\n  --header \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\" \\\n  -- hostinger-email https://mcp.mail.hostinger.com/mcp\n```\n\n</details>\n\n<details>\n<summary><strong>Claude Desktop</strong></summary>\n\nClaude Desktop connects to MCP servers via stdio. Use the `mcp-remote` bridge to talk to our HTTP server. Requires Node.js (`npx` ships with it).\n\nEdit the Claude Desktop config file. Path depends on your OS:\n\n- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`\n- **Windows:** `%APPDATA%\\Claude\\claude_desktop_config.json`\n- **Linux:** `~/.config/Claude/claude_desktop_config.json`\n\nSet the contents to:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"mcp-remote\",\n        \"https://mcp.mail.hostinger.com/mcp\",\n        \"--header\",\n        \"Authorization: Bearer YOUR_HOSTINGER_API_TOKEN\"\n      ]\n    }\n  }\n}\n```\n\nQuit Claude Desktop fully (not just close the window) and reopen it. The connector icon should appear in the message composer.\n\nIf you have Claude Desktop's paid \"Custom Connectors\" feature, you can skip the `mcp-remote` bridge entirely and add the HTTP URL directly via the in-app UI:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\n</details>\n\n<details>\n<summary><strong>Cursor</strong></summary>\n\nCreate or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` in your project root:\n\n```json\n{\n  \"mcpServers\": {\n    \"hostinger-email\": {\n      \"url\": \"https://mcp.mail.hostinger.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer YOUR_HOSTINGER_API_TOKEN\" }\n    }\n  }\n}\n```\n\nRestart Cursor. The server is also configurable via `Cmd-Shift-P` → `View: Open MCP Settings` (newer Cursor versions).\n\n</details>\n\n<details>\n<summary><strong>What can the agent do?</strong></summary>\n\nSame as this REST API — read, search, send, move, flag, delete messages; list folders and mailboxes; manage webhooks. The agent calls these endpoints under the hood using your API token.\n\nThe agent only reaches what your token permits. Tokens are scoped to a single Hostinger order, and you can further restrict each token to specific mailboxes within that order when generating it in the Panel.\n\n</details>\n\n# Other plugins\n- **ChatGPT plugin** - read and send your Hostinger email straight from ChatGPT ([Open](https://chatgpt.com/plugins/plugin_asdk_app_6a323a8a890c819190480c9044395170))\n\n# Feedback from integrations and AI agents\nSomething did not work, was slow, or is missing? Tell the Hostinger mail team directly from your code or your agent: `POST /api/v1/mailboxes/{mailboxResourceId}/feedback` (MCP tool `email_report_feedback`) with a `score` (1-10) and a short `message`. Reports reach the team's feedback channel within minutes.\n\nReport when a call returned `4xx`/`5xx` or unexpected data, when a response was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and the status code you received so the team can find the request. Never include tokens, passwords or email contents: messages are scrubbed of secrets and capped at 2000 characters. Send one report per distinct issue.\n\n# Authentication\nThe API uses tokens for authentication. To authenticate your requests, you need to include a valid bearer token in the `Authorization` header of your HTTP requests:\n\n```yaml\nAuthorization: Bearer YOUR_API_TOKEN\n```\n\nAPI tokens can be created and managed from the email provisioning tab in the Hostinger Panel.\nTokens are scoped to a single order; their permissions are limited to that order.\n\nOnly mailboxes belonging to the order can be accessed and managed by an API token.\n\n# Rate Limiting\nTo ensure fair usage and prevent abuse, the API enforces rate limits on the number of requests that can be made within a certain time period.\nIf you exceed the rate limit, you will receive a `429 Too Many Requests` response.\nYour IP address might get temporarily blocked if you exceed the rate limit multiple times.\n\n# Parameters\nAll requests sent to the API must have the content type `application/json`.\n`POST`, `PUT`, `PATCH` methods may include a JSON object in the request body.\nDocumentation provides the required structure and examples of the object.\nSome endpoints require path parameters.\nThese parameters are included in the URL path and are marked with curly braces.\n\n# Response envelope\nAll non-`204` responses wrap the payload in a top-level `data` field.\n\nSingle resource:\n\n```json\n{\n  \"data\": {\n    \"resourceId\": \"AC1a2b3c4d5e6f7g\",\n    \"address\": \"user@example.com\"\n  }\n}\n```\n\nCollection (empty or otherwise):\n\n```json\n{\n  \"data\": []\n}\n```\n\n# Pagination\nPaginated responses include a top-level `pagination` object alongside `data`. By default, the API returns 50 items per page.\nThe page number can be specified using the `page` query parameter, for example: `/core/v1/public/mailboxes?page=2`.\n\n```json\n{\n  \"data\": [],\n  \"pagination\": {\n    \"page\": 1,\n    \"perPage\": 25,\n    \"total\": 137,\n    \"totalPages\": 6\n  }\n}\n```\n\n# Errors\nAll `4xx` and `5xx` responses share a single envelope. Always parse `code` for programmatic handling; `error` is a human-readable message intended for logs and support tickets.\n\n```json\n{\n  \"error\": \"Mailbox not found.\",\n  \"code\": \"ERR_MAILBOX_NOT_FOUND\",\n  \"params\": {}\n}\n```",
+        "version": "1.2.1"
     },
     "servers": [
         {
@@ -11,6 +11,69 @@
         }
     ],
     "paths": {
+        "/api/v1/mailboxes/{mailboxResourceId}/feedback": {
+            "post": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Submit feedback",
+                "description": "Report a problem or suggestion about this API or the MCP server to the Hostinger mail team.\n\nReport when a call returned 4xx/5xx or unexpected data, was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and the status code you received so the team can find the request. Never include tokens, passwords or email contents: the message is scrubbed of secrets and capped at 2000 characters. Send one report per distinct issue.\n\nA `429` (`ERR_FEEDBACK_RATE_LIMIT`) means feedback for this customer was submitted less than ten seconds ago; wait and retry.",
+                "operationId": "submitFeedback",
+                "parameters": [
+                    {
+                        "name": "mailboxResourceId",
+                        "in": "path",
+                        "description": "Resource ID of the managed mailbox the feedback is about, as returned by `GET /api/v1/me`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "AC1a2b3c4d5e6f7g"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/V1.Feedback.SubmitRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Feedback accepted."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Common.Response.UnauthorizedResponse"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Common.Response.ForbiddenResponse"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/Common.Response.ValidationFailedResponse"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/Common.Response.TooManyRequestsResponse"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Common.Response.InternalServerErrorResponse"
+                    },
+                    "502": {
+                        "$ref": "#/components/responses/Common.Response.BadGatewayResponse"
+                    },
+                    "504": {
+                        "$ref": "#/components/responses/Common.Response.GatewayTimeoutResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages": {
             "get": {
                 "tags": [
@@ -886,6 +949,7 @@
                     {
                         "name": "page",
                         "in": "query",
+                        "description": "Page number (1-based).",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -896,6 +960,7 @@
                     {
                         "name": "perPage",
                         "in": "query",
+                        "description": "Items per page (max 100).",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -907,6 +972,7 @@
                     {
                         "name": "sort",
                         "in": "query",
+                        "description": "Sort field with optional `-` prefix for descending. Allowed: uid, date, size.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1457,6 +1523,9 @@
                     },
                     "502": {
                         "$ref": "#/components/responses/Common.Response.BadGatewayResponse"
+                    },
+                    "504": {
+                        "$ref": "#/components/responses/Common.Response.GatewayTimeoutResponse"
                     }
                 },
                 "security": [
@@ -1488,6 +1557,7 @@
                     {
                         "name": "status",
                         "in": "query",
+                        "description": "Return only webhooks with this status.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1501,6 +1571,7 @@
                     {
                         "name": "page",
                         "in": "query",
+                        "description": "Page number (1-based).",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1511,6 +1582,7 @@
                     {
                         "name": "perPage",
                         "in": "query",
+                        "description": "Items per page (max 1000).",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -2003,6 +2075,29 @@
                 },
                 "type": "object"
             },
+            "V1.Feedback.SubmitRequest": {
+                "description": "Feedback about the Mail API or the MCP server. The message is scrubbed of tokens, JWTs and key/secret/password values before validation and storage, so the length limit applies to the scrubbed text.",
+                "required": [
+                    "score",
+                    "message"
+                ],
+                "properties": {
+                    "score": {
+                        "description": "How well the API served the task: 1 (poor) to 10 (excellent).",
+                        "type": "integer",
+                        "example": 3,
+                        "maximum": 10,
+                        "minimum": 1
+                    },
+                    "message": {
+                        "description": "What happened and what was expected, including the operation and status code involved. Never include tokens, passwords or email contents.",
+                        "type": "string",
+                        "example": "POST /api/v1/mailboxes/{mailboxResourceId}/send returned 502 after 30 seconds for a message with a 10 MB attachment.",
+                        "maxLength": 2000
+                    }
+                },
+                "type": "object"
+            },
             "V1.FolderMessages.Collection": {
                 "description": "Paginated list of messages.",
                 "required": [
@@ -2068,6 +2163,7 @@
                         "minItems": 1
                     },
                     "addFlags": {
+                        "description": "IMAP flags to set on every listed message, e.g. \\Seen, \\Flagged, \\Answered, $forwarded.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2082,6 +2178,7 @@
                         ]
                     },
                     "removeFlags": {
+                        "description": "IMAP flags to clear from every listed message.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2100,6 +2197,7 @@
                 "description": "Add and/or remove flags on a message. At least one of addFlags or removeFlags must be set.",
                 "properties": {
                     "addFlags": {
+                        "description": "IMAP flags to set on the message, e.g. \\Seen, \\Flagged, \\Answered, $forwarded.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2114,6 +2212,7 @@
                         ]
                     },
                     "removeFlags": {
+                        "description": "IMAP flags to clear from the message.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2379,19 +2478,22 @@
                 "type": "object"
             },
             "V1.FolderMessages.SearchRequest": {
-                "description": "Search criteria. All fields optional; combine to narrow results.",
+                "description": "Search criteria. All fields optional. subject, from, to, cc and body are alternatives (a message matching any one of them qualifies); all other fields are combined with AND.",
                 "properties": {
                     "since": {
+                        "description": "Only messages received on or after this date (YYYY-MM-DD).",
                         "type": "string",
                         "format": "date",
                         "example": "2024-01-01"
                     },
                     "before": {
+                        "description": "Only messages received before this date (YYYY-MM-DD).",
                         "type": "string",
                         "format": "date",
                         "example": "2024-12-31"
                     },
                     "flags": {
+                        "description": "Only messages carrying all of these IMAP flags, e.g. \\Seen, \\Flagged, \\Answered, $forwarded.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2405,50 +2507,60 @@
                         ]
                     },
                     "uid": {
+                        "description": "IMAP UID set: single UID, range (1:100), open range (100:*), or comma-separated list.",
                         "type": "string",
                         "example": "1:100"
                     },
                     "subject": {
+                        "description": "Case-insensitive substring match on the Subject header. OR-combined with from/to/cc/body.",
                         "type": "string",
                         "example": "meeting",
                         "maxLength": 1024
                     },
                     "from": {
+                        "description": "Case-insensitive substring match on the From header. OR-combined with subject/to/cc/body.",
                         "type": "string",
                         "example": "john@example.com",
                         "maxLength": 320
                     },
                     "to": {
+                        "description": "Case-insensitive substring match on the To header. OR-combined with subject/from/cc/body.",
                         "type": "string",
                         "example": "jane@example.com",
                         "maxLength": 320
                     },
                     "cc": {
+                        "description": "Case-insensitive substring match on the Cc header. OR-combined with subject/from/to/body.",
                         "type": "string",
                         "example": "team@example.com",
                         "maxLength": 320
                     },
                     "body": {
+                        "description": "Case-insensitive substring match on the message body only (headers excluded). OR-combined with subject/from/to/cc.",
                         "type": "string",
                         "example": "important",
                         "maxLength": 1024
                     },
                     "header": {
+                        "description": "Match a specific header as Name:value, e.g. X-Custom-Header:value. Value match is a substring.",
                         "type": "string",
                         "example": "X-Custom-Header:value",
                         "maxLength": 1024
                     },
                     "larger": {
+                        "description": "Only messages larger than this size in bytes.",
                         "type": "integer",
                         "example": 1024,
                         "minimum": 0
                     },
                     "smaller": {
+                        "description": "Only messages smaller than this size in bytes.",
                         "type": "integer",
                         "example": 1048576,
                         "minimum": 0
                     },
                     "text": {
+                        "description": "Case-insensitive substring match across headers and body.",
                         "type": "string",
                         "example": "urgent",
                         "maxLength": 1024
@@ -2777,6 +2889,7 @@
                 ],
                 "properties": {
                     "filename": {
+                        "description": "File name shown to the recipient, including extension.",
                         "type": "string",
                         "example": "invoice.pdf"
                     },
@@ -2786,6 +2899,7 @@
                         "example": "JVBERi0xLjQK..."
                     },
                     "contentType": {
+                        "description": "MIME type of the attachment, e.g. application/pdf. Not inferred from filename; set it explicitly so clients render the attachment correctly.",
                         "type": "string",
                         "example": "application/pdf"
                     },
@@ -2806,6 +2920,7 @@
                 "description": "Outgoing message payload. At least one of to, cc, or bcc must be present.",
                 "properties": {
                     "to": {
+                        "description": "Primary recipient email addresses.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2816,10 +2931,12 @@
                         ]
                     },
                     "displayName": {
+                        "description": "Sender display name shown in the From header alongside the mailbox address.",
                         "type": "string",
                         "example": "John Doe"
                     },
                     "cc": {
+                        "description": "Carbon-copy recipient email addresses.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2830,6 +2947,7 @@
                         ]
                     },
                     "bcc": {
+                        "description": "Blind-carbon-copy recipient email addresses. Not visible to other recipients.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2840,18 +2958,22 @@
                         ]
                     },
                     "subject": {
+                        "description": "Message subject line.",
                         "type": "string",
                         "example": "Hello"
                     },
                     "text": {
+                        "description": "Plain-text body. Optional; if both text and html are omitted the message is sent without a body.",
                         "type": "string",
                         "example": "Plain body"
                     },
                     "html": {
+                        "description": "HTML body. Optional; if both text and html are omitted the message is sent without a body. Inline images are referenced via cid: URLs matching attachment cid values.",
                         "type": "string",
                         "example": "<p>HTML body</p>"
                     },
                     "attachments": {
+                        "description": "Files to attach. Inline images set cid; regular attachments omit it.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/V1.Send.Attachment"
@@ -2921,16 +3043,19 @@
                 ],
                 "properties": {
                     "name": {
+                        "description": "Human-readable webhook name.",
                         "type": "string",
                         "example": "New message notifier",
                         "maxLength": 255
                     },
                     "description": {
+                        "description": "Optional free-text note about the webhook purpose.",
                         "type": "string",
                         "example": "Notifies CRM on new mail",
                         "nullable": true
                     },
                     "events": {
+                        "description": "Event types that trigger a delivery.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -2943,6 +3068,7 @@
                         ]
                     },
                     "status": {
+                        "description": "Initial delivery state. Only active webhooks receive events.",
                         "type": "string",
                         "example": "active",
                         "default": "active",
@@ -2953,6 +3079,7 @@
                         ]
                     },
                     "url": {
+                        "description": "HTTPS endpoint that receives POST deliveries, authenticated with the webhook secret as `Authorization: Bearer <secret>`. Must be a public domain name (no IPs or internal hosts).",
                         "type": "string",
                         "format": "uri",
                         "example": "https://example.com/webhooks/incoming",
@@ -3019,16 +3146,19 @@
                 "description": "Body for partially updating a webhook. All fields optional; only present fields are applied.",
                 "properties": {
                     "name": {
+                        "description": "Human-readable webhook name.",
                         "type": "string",
                         "example": "Renamed webhook",
                         "maxLength": 255
                     },
                     "description": {
+                        "description": "Free-text note about the webhook purpose. Send null to clear.",
                         "type": "string",
                         "example": "Updated description",
                         "nullable": true
                     },
                     "events": {
+                        "description": "Event types that trigger a delivery. Replaces the current list.",
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -3042,6 +3172,7 @@
                         "minItems": 1
                     },
                     "status": {
+                        "description": "Delivery state. Only active webhooks receive events; paused keeps config but stops deliveries.",
                         "type": "string",
                         "example": "paused",
                         "enum": [
@@ -3051,6 +3182,7 @@
                         ]
                     },
                     "url": {
+                        "description": "HTTPS endpoint that receives POST deliveries, authenticated with the webhook secret as `Authorization: Bearer <secret>`. Must be a public domain name (no IPs or internal hosts).",
                         "type": "string",
                         "format": "uri",
                         "example": "https://example.com/webhooks/new",
@@ -3207,6 +3339,21 @@
                     }
                 }
             },
+            "Common.Response.GatewayTimeoutResponse": {
+                "description": "Upstream service did not respond within the configured timeout.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "error": "Upstream service timed out.",
+                            "code": "ERR_GATEWAY_TIMEOUT",
+                            "params": []
+                        }
+                    }
+                }
+            },
             "Common.Response.InternalServerErrorResponse": {
                 "description": "Server-side failure.",
                 "content": {
@@ -3232,6 +3379,21 @@
                         "example": {
                             "error": "Resource not found.",
                             "code": "ERR_NOT_FOUND",
+                            "params": []
+                        }
+                    }
+                }
+            },
+            "Common.Response.TooManyRequestsResponse": {
+                "description": "Feedback for this customer was submitted less than ten seconds ago. Wait and retry.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "error": "Feedback was submitted too recently. Try again later.",
+                            "code": "ERR_FEEDBACK_RATE_LIMIT",
                             "params": []
                         }
                     }
@@ -3309,7 +3471,11 @@
         {
             "name": "Quota",
             "description": "Inspect storage and message quota usage for a managed mailbox."
+        },
+        {
+            "name": "Feedback",
+            "description": "Report problems or suggestions about this API or the MCP server. Report after a call failed or returned unexpected data, when documentation was missing or unclear, when a response was too slow, or when a capability you need does not exist. Mention the failing operation and status code in the message; never include tokens or email contents."
         }
     ],
-    "x-mcp-instructions": "Hostinger Mail API access — use this server when the user wants to read, search, send, organize, or manage email in their Hostinger mailbox(es), or manage email webhooks.\n\nCapabilities:\n- List mailboxes belonging to the authenticated Hostinger order\n- List folders inside a mailbox (Inbox, Sent, Drafts, Trash, custom)\n- List, search, fetch, move, delete, flag messages\n- Read message body (text/HTML), full RFC822 source, attachments\n- Send email from a mailbox\n- Manage webhooks (create, list, test, regenerate secret, delete)\n\nMailbox discovery: there is no standalone \"list mailboxes\" endpoint. Call `GET /api/v1/me` first — the response contains `data.mailboxes[]` with each mailbox's `resourceId` and `address`. Use that `resourceId` as `mailboxResourceId` in every other endpoint.\n\nWorkflow:\n1. Discover endpoints (optionally filter by tag: \"Messages\", \"Mailboxes\", \"Folders\", \"Webhooks\", \"Send\").\n2. Inspect the operation schema (parameters, request body, responses).\n3. Execute the call. Path templates use `{placeholder}` substitution.\n\nAuth: each request must carry `Authorization: Bearer <customer-Hostinger-token>`. Tokens are scoped to one Hostinger order and may be further restricted to specific mailboxes within that order — assume access is partial unless verified."
+    "x-mcp-instructions": "Hostinger Mail API access — use this server when the user wants to read, search, send, organize, or manage email in their Hostinger mailbox(es), or manage email webhooks.\n\nCapabilities:\n- List mailboxes belonging to the authenticated Hostinger order\n- List folders inside a mailbox (Inbox, Sent, Drafts, Trash, custom)\n- List, search, fetch, move, delete, flag messages\n- Read message body (text/HTML), full RFC822 source, attachments\n- Send email from a mailbox\n- Manage webhooks (create, list, test, regenerate secret, delete)\n- Report feedback about this API or the MCP server (`POST /api/v1/mailboxes/{mailboxResourceId}/feedback`)\n\nMailbox discovery: there is no standalone \"list mailboxes\" endpoint. Call `GET /api/v1/me` first — the response contains `data.mailboxes[]` with each mailbox's `resourceId` and `address`. Use that `resourceId` as `mailboxResourceId` in every other endpoint.\n\nWorkflow:\n1. Discover endpoints (optionally filter by tag: \"Messages\", \"Mailboxes\", \"Folders\", \"Webhooks\", \"Send\").\n2. Inspect the operation schema (parameters, request body, responses).\n3. Execute the call. Path templates use `{placeholder}` substitution.\n\nAuth: each request must carry `Authorization: Bearer <customer-Hostinger-token>`. Tokens are scoped to one Hostinger order and may be further restricted to specific mailboxes within that order — assume access is partial unless verified.\n\nWhen to report feedback: call `POST /api/v1/mailboxes/{mailboxResourceId}/feedback` when a call returned 4xx/5xx or unexpected data, was too slow, when documentation was missing or unclear, or when a capability you needed does not exist. Mention the failing operation and its status code in the message. Keep the message under 2000 characters, never include tokens, passwords or email contents, and send one report per distinct issue."
 }
