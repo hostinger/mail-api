@@ -1,3 +1,43 @@
+## v1.3.0 - 2026-10-22
+
+# API Changelog 1.2.2 vs. 1.3.0
+
+
+## API Changes
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages
+- :warning: added `subschema #2` to the `data/items/from` response property `oneOf` list for the response status `200`
+-  the response property `data/items/from` became not nullable for the status `200`
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/search
+- :warning: added `subschema #2` to the `data/items/from` response property `oneOf` list for the response status `200`
+-  the response property `data/items/from` became not nullable for the status `200`
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/{uid}
+- :warning: added `subschema #2` to the `data/from` response property `oneOf` list for the response status `200`
+-  the response property `data/from` became not nullable for the status `200`
+
+
+### PATCH /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/{uid}
+- :warning: added `subschema #2` to the `data/from` response property `oneOf` list for the response status `200`
+-  the response property `data/from` became not nullable for the status `200`
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/send
+- :warning: removed `subschema #1, subschema #2, subschema #3` from the request body `anyOf` list
+
+
+
+
+## Info
+-  a breaking change was detected but the major version did not increase, from `1.2.2` to `1.3.0`
+
+
+
+
+
 ## v1.2.2 - 2026-10-09
 
 # API Changelog 1.2.1 vs. 1.2.2
