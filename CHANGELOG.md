@@ -1,3 +1,75 @@
+## v1.4.0 - 2026-11-24
+
+# API Changelog 1.3.0 vs. 1.4.0
+
+
+## API Changes
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/calendars
+-  endpoint added
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/calendars
+-  endpoint added
+
+
+### DELETE /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}
+-  endpoint added
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}
+-  endpoint added
+
+
+### PUT /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}
+-  endpoint added
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events
+-  endpoint added
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events
+-  endpoint added
+
+
+### DELETE /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events/{eventUuid}
+-  endpoint added
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events/{eventUuid}
+-  endpoint added
+
+
+### PUT /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events/{eventUuid}
+-  endpoint added
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events/{eventUuid}/reply
+-  endpoint added
+
+
+### PUT /api/v1/mailboxes/{mailboxResourceId}/calendars/{calendarUuid}/events/{eventUuid}/reschedule
+-  endpoint added
+
+
+### POST /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/search
+-  added the non-success response with the status `504`
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/{uid}/attachments/{attachmentId}
+-  added the non-success response with the status `504`
+
+
+### GET /api/v1/mailboxes/{mailboxResourceId}/folders/{folder}/messages/{uid}/source
+-  added the non-success response with the status `504`
+
+
+
+
+
+
+
 ## v1.3.0 - 2026-10-22
 
 # API Changelog 1.2.2 vs. 1.3.0
